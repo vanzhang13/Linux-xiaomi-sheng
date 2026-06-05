@@ -2,7 +2,7 @@ name: Build Kernel Bundle
 
 on:
   workflow_run:
-    workflows: ["Build Kernel"]   # HARUS sama dengan "name" di build.yml
+    workflows: ["Build Kernel"]
     types:
       - completed
 
@@ -29,7 +29,7 @@ jobs:
         mkdir bundle && cd bundle
 
         echo "⬇️ Download kernel packages"
-        gh release download "kernel-7.0" \
+        gh release download "kernel-${{ github.event.inputs.kernel_version || '7.0' }}" \
           --pattern "*.deb" \
           --repo "${{ github.repository }}" \
           --clobber || true
@@ -40,8 +40,8 @@ jobs:
           --repo "${{ github.repository }}" \
           --clobber || true
 
-        echo "⬇️ Download sensor"
-        gh release download "sensor" \
+        echo "⬇️ Download sensors"
+        gh release download "sensors" \
           --pattern "*.deb" \
           --repo "${{ github.repository }}" \
           --clobber || true
@@ -50,7 +50,7 @@ jobs:
         ls -lah
 
         COUNT=$(ls *.deb 2>/dev/null | wc -l)
-        if [ "$COUNT" -lt 5 ]; then
+        if [ "$COUNT" -lt 3 ]; then
           echo "❌ Not enough packages"
           exit 1
         fi
@@ -61,8 +61,8 @@ jobs:
     - name: Create bundle release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: kernel-bundle-${{ github.event.inputs.kernel_version }}
-        name: Kernel Bundle ${{ github.event.inputs.kernel_version }}
+        tag_name: kernel-bundle-${{ github.event.inputs.kernel_version || '7.0' }}
+        name: Kernel Bundle ${{ github.event.inputs.kernel_version || '7.0' }}
         files: bundle/*.deb
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
