@@ -146,7 +146,7 @@ jobs:
 
         gh release download "kernel-bundle-$KERNEL_VER" \
           --pattern "*.deb" \
-          --repo "${{ github.repository }}" \
+          --repo "alghiffaryfa19/Linux-xiaomi-sheng" \
           --clobber
 
         echo "📂 Downloaded files:"
