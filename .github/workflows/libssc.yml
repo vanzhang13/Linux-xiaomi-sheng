@@ -92,8 +92,7 @@ jobs:
           name: "libssc"
           draft: false
           prerelease: false
-          files:
-            - libssc_${PKGVERSION}-${PKGREL}_arm64.deb
+          files: "libssc_${PKGVERSION}-${PKGREL}_arm64.deb"
           generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

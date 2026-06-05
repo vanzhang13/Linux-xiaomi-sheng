@@ -96,7 +96,6 @@ jobs:
           name: "fastrpc"
           draft: false
           prerelease: false
-          files:
-            - fastrpc_${PKGVERSION}-${PKGREL}_arm64.deb
+          files: "fastrpc_${PKGVERSION}-${PKGREL}_arm64.deb"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

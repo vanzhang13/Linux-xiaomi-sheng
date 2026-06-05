@@ -67,7 +67,7 @@ jobs:
       - name: Build DEB
         run: |
           dpkg-deb --build sheng-devauth
-          mv sheng-devauth.deb ./sheng-devauth.deb
+          ls -la *.deb
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -82,8 +82,7 @@ jobs:
           name: "sheng_devauth"
           draft: false
           prerelease: false
-          files:
-            - sheng-devauth.deb
+          files: "sheng-devauth.deb"
           generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

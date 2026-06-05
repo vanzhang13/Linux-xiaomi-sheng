@@ -129,8 +129,7 @@ jobs:
           name: "iio_sensor_patched"
           draft: false
           prerelease: false
-          files:
-            - iio-sensor-proxy_9999${PKGVERSION}-${PKGREL}_arm64.deb
+          files: "iio-sensor-proxy_9999${PKGVERSION}-${PKGREL}_arm64.deb"
           generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

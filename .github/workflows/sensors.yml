@@ -53,7 +53,7 @@ jobs:
       - name: Build DEB package
         run: |
           dpkg-deb --build deb
-          mv deb.deb ./sheng-sensors.deb
+          mv deb.deb sheng-sensors.deb
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -68,7 +68,6 @@ jobs:
           name: "sensors"
           draft: false
           prerelease: false
-          files:
-            - sheng-sensors.deb
+          files: "sheng-sensors.deb"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
