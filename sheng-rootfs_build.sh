@@ -135,6 +135,14 @@ user-session=lomiri
 greeter-session=lightdm-gtk-greeter
 EOF
 
+    elif [ "$FLAVOUR" = "kde" ]; then
+        mkdir -p rootdir/etc/sddm.conf.d
+        cat > rootdir/etc/sddm.conf.d/autologin.conf <<EOF
+[Autologin]
+User=siergtc
+Session=plasma.desktop
+EOF
+
     else
         mkdir -p rootdir/etc/gdm3
         cat > rootdir/etc/gdm3/daemon.conf <<EOF
