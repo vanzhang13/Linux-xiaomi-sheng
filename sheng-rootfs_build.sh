@@ -29,7 +29,7 @@ distro_version="trixie"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
 # 🔥 MULTI FLAVOUR
-FLAVOURS=("gnome")
+FLAVOURS=("gnome" "kde")
 BOOTMODES=("dual")
 
 for FLAVOUR in "${FLAVOURS[@]}"; do
@@ -110,6 +110,13 @@ if [ "$distro_variant" = "desktop" ]; then
             gnome-shell gnome-session gnome-terminal gdm3 firefox-esr
 
         chroot rootdir systemctl enable gdm3
+        
+    elif [ "$FLAVOUR" = "kde" ]; then
+        chroot rootdir apt install -y \
+            kde-standard sddm plasma-nm firefox-esr
+
+        chroot rootdir systemctl disable gdm3 2>/dev/null || true
+        chroot rootdir systemctl enable sddm
     fi
 
     # user
