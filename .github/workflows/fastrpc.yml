@@ -87,7 +87,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fastrpc-deb
-          path: fastrpc_*.deb
+          path: fastrpc_${{ env.PKGVERSION }}-${{ env.PKGREL }}_arm64.deb
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -97,6 +97,6 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            fastrpc_${PKGVERSION}-${PKGREL}_arm64.deb
+            fastrpc_${{ env.PKGVERSION }}-${{ env.PKGREL }}_arm64.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

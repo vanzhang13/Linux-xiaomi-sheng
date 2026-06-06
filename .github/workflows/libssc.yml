@@ -11,89 +11,55 @@ jobs:
 
     env:
       PKGNAME: libssc
-      PKGVERSION: 0.3.0
-      PKGREL: 1
+      PKGVERSION: 1.6.1
+      PKGREL: 2
 
     steps:
-      - name: Install build dependencies
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y \
-            build-essential \
-            ninja-build \
-            git \
-            pkg-config \
-            python3-pip \
-            libglib2.0-dev \
-            libprotobuf-c-dev \
-            libqmi-glib-dev \
-            libmbim-glib-dev \
-            linux-libc-dev \
-            protobuf-compiler \
-            protobuf-c-compiler
-
-          pip3 install --upgrade meson
+          sudo apt install -y dpkg-dev debhelper dh-make fakeroot devscripts git
 
       - name: Clone source repository
         run: |
-          git clone https://codeberg.org/DylanVanAssche/libssc.git source
-
-      - name: Apply patch
-        run: |
-          cd source
-          wget https://raw.githubusercontent.com/alghiffaryfa19/sheng-sensors-patch/refs/heads/main/libssc-git/wait_for_qmi_service.patch
-          patch -Np1 < wait_for_qmi_service.patch || true
-
-      - name: Build project
-        run: |
-          cd source
-          meson setup build --prefix=/usr
-          meson compile -C build
-
-      - name: Install into staging directory
-        run: |
-          cd source
-          DESTDIR=$PWD/stage meson install -C build
+          git clone https://github.com/alghiffaryfa19/libssc-pcm-pro.git source
 
       - name: Prepare DEB structure
         run: |
-          mkdir -p deb/DEBIAN
-          mkdir -p deb/usr
+          cp -r source/libssc libssc
+          cd libssc
+          mkdir -p DEBIAN
 
-          cp -r source/stage/usr/* deb/usr/
-
-          cat > deb/DEBIAN/control <<EOF
-          Package: ${PKGNAME}
-          Version: ${PKGVERSION}-${PKGREL}
+          cat > DEBIAN/control <<EOF
+          Package: lib${{ env.PKGNAME }}
+          Version: ${{ env.PKGVERSION }}-${{ env.PKGREL }}
           Section: libs
           Priority: optional
           Architecture: arm64
-          Maintainer: Fauzan Amir Al Ghiffary <alghiffaryfa19@gmail.com>
-          Depends: libglib2.0-0, libprotobuf-c1, libqmi-glib5
-          Description: Library to expose Qualcomm Sensor Core sensors
-           libssc userspace library for Qualcomm SSC.
+          Maintainer: Alghiffary <alghiffaryfa19@gmail.com>
+          Description: Sony Creative Software libraries
+          Library for working with Sony Creative Software formats.
           EOF
 
-      - name: Build DEB package
+      - name: Build DEB
         run: |
-          dpkg-deb --build deb
-          mv deb.deb ${PKGNAME}_${PKGVERSION}-${PKGREL}_arm64.deb
+          cd libssc
+          dpkg-deb --build . libssc_${{ env.PKGVERSION }}-${{ env.PKGREL }}_arm64.deb
+          ls -la libssc_${{ env.PKGVERSION }}-${{ env.PKGREL }}_arm64.deb
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: libssc-deb
-          path: libssc_*.deb
+          name: libssc
+          path: libssc_${{ env.PKGVERSION }}-${{ env.PKGREL }}_arm64.deb
 
-      - name: "Release"
+      - name: Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: libssc
           name: "libssc"
           draft: false
           prerelease: false
-          files: |
-            libssc_${PKGVERSION}-${PKGREL}_arm64.deb
-          generate_release_notes: false
+          files: libssc_${{ env.PKGVERSION }}-${{ env.PKGREL }}_arm64.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

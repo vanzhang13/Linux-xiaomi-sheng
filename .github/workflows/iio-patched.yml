@@ -45,23 +45,22 @@ jobs:
           pkg-config --modversion gio-2.0 || true
           pkg-config --modversion glib-2.0 || true
 
-      - name: "Download libssc"
+      - name: Download libssc
         id: download_libssc
         run: |
-          
-          # GitHub CLI Release
+          # Use GitHub CLI Release to download from releases
           gh release download "libssc" \
             --pattern "*.deb" \
             --repo "${{ github.repository }}" \
             --clobber
-          
+
           DEB_COUNT=$(ls -1 *.deb 2>/dev/null | wc -l)
           if [ $DEB_COUNT -eq 0 ]; then
-            echo "�?错误：未下载到任何内核包�?
+            echo "❌ 错误：未下载到任何内核包"
             exit 1
           fi
-          
-          echo "�?成功下载 $DEB_COUNT 个内核包"
+
+          echo "✅ 成功下载 $DEB_COUNT 个内核包"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -69,18 +68,18 @@ jobs:
         run: |
           sudo dpkg -i *.deb
           sudo ldconfig
-          
+
           echo "🔍 Checking libssc..."
           pkg-config --modversion libssc || true
 
       - name: Download source
         run: |
-          wget https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/-/archive/${PKGVERSION}/iio-sensor-proxy-${PKGVERSION}.tar.gz
-          tar -xf iio-sensor-proxy-${PKGVERSION}.tar.gz
+          wget https://gitlab.freedesktop.org/hadess/iio-sensor-proxy/-/archive/${{ env.PKGVERSION }}/iio-sensor-proxy-${{ env.PKGVERSION }}.tar.gz
+          tar -xf iio-sensor-proxy-${{ env.PKGVERSION }}.tar.gz
 
       - name: Build project
         run: |
-          cd iio-sensor-proxy-${PKGVERSION}
+          cd iio-sensor-proxy-${{ env.PKGVERSION }}
           meson setup output \
             --prefix=/usr \
             -Db_lto=true \
@@ -91,17 +90,17 @@ jobs:
 
       - name: Install into staging
         run: |
-          cd iio-sensor-proxy-${PKGVERSION}
+          cd iio-sensor-proxy-${{ env.PKGVERSION }}
           DESTDIR=$PWD/stage meson install --no-rebuild -C output
 
       - name: Prepare DEB structure
         run: |
           mkdir -p deb/DEBIAN
-          cp -r iio-sensor-proxy-${PKGVERSION}/stage/usr deb/
+          cp -r iio-sensor-proxy-${{ env.PKGVERSION }}/stage/usr deb/
 
           cat > deb/DEBIAN/control <<EOF
-          Package: ${PKGNAME}
-          Version: 9999${PKGVERSION}-${PKGREL}
+          Package: ${{ env.PKGNAME }}
+          Version: 9999${{ env.PKGVERSION }}-${{ env.PKGREL }}
           Section: misc
           Priority: optional
           Architecture: arm64
@@ -113,24 +112,24 @@ jobs:
 
       - name: Build DEB
         run: |
-          dpkg-deb --build deb
-          mv deb.deb ${PKGNAME}_9999${PKGVERSION}-${PKGREL}_arm64.deb
+          cd deb
+          dpkg-deb --build . ${{ env.PKGNAME }}_9999${{ env.PKGVERSION }}-${{ env.PKGREL }}_arm64.deb
+          ls -la ${{ env.PKGNAME }}_9999${{ env.PKGVERSION }}-${{ env.PKGREL }}_arm64.deb
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: iio-sensor-proxy-ssc-patched
-          path: "*.deb"
+          path: deb/${{ env.PKGNAME }}_9999${{ env.PKGVERSION }}-${{ env.PKGREL }}_arm64.deb
 
-      - name: "Release"
+      - name: Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: iio_sensor_patched
           name: "iio_sensor_patched"
           draft: false
           prerelease: false
-          files: |
-            iio-sensor-proxy_9999${PKGVERSION}-${PKGREL}_arm64.deb
+          files: deb/${{ env.PKGNAME }}_9999${{ env.PKGVERSION }}-${{ env.PKGREL }}_arm64.deb
           generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

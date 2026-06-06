@@ -56,23 +56,19 @@ jobs:
           mv deb.deb sheng-sensors.deb
           ls -la sheng-sensors.deb
 
-      - name: Create Release
-        id: create_release
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sheng-sensors
+          path: sheng-sensors.deb
+
+      - name: Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: sensors
           name: "sensors"
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload DEB to Release
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: sheng-sensors.deb
-          asset_name: sheng-sensors.deb
-          asset_content_type: application/x-debian-package
+          files: sheng-sensors.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
